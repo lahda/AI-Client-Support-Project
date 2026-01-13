@@ -1,0 +1,167 @@
+{
+  "Comment": "Intelligent Multilingual Customer Support with AI Services",
+  "StartAt": "TranslateAndAnalyze",
+  "States": {
+    "TranslateAndAnalyze": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:934692410245:function:Translate-And-Analyze",
+        "Payload.$": "$"
+      },
+      "ResultPath": "$",
+      "ResultSelector": {
+        "result.$": "$.Payload"
+      },
+      "OutputPath": "$.result",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "CheckPriority"
+    },
+    "CheckPriority": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.priority",
+          "StringEquals": "HIGH",
+          "Next": "HighPriorityNotification"
+        }
+      ],
+      "Default": "GenerateAIResponse"
+    },
+    "HighPriorityNotification": {
+      "Type": "Pass",
+      "Comment": "Cas haute priorité détecté - traitement immédiat",
+      "Result": {
+        "priority_alert": "HIGH_PRIORITY_DETECTED"
+      },
+      "ResultPath": "$.priority_notification",
+      "Next": "GenerateAIResponse"
+    },
+    "GenerateAIResponse": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:934692410245:function:Generate-AI-Response",
+        "Payload.$": "$"
+      },
+      "ResultPath": "$",
+      "ResultSelector": {
+        "result.$": "$.Payload"
+      },
+      "OutputPath": "$.result",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "GenerateVoiceResponse"
+    },
+    "GenerateVoiceResponse": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:934692410245:function:Generate-Voice-Response",
+        "Payload.$": "$"
+      },
+      "ResultPath": "$",
+      "ResultSelector": {
+        "result.$": "$.Payload"
+      },
+      "OutputPath": "$.result",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "SendResponse",
+          "ResultPath": "$.error",
+          "Comment": "Continue même si Polly échoue"
+        }
+      ],
+      "Next": "SendResponse"
+    },
+    "SendResponse": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:934692410245:function:Send-Response",
+        "Payload.$": "$"
+      },
+      "ResultPath": "$",
+      "ResultSelector": {
+        "result.$": "$.Payload"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "ErrorHandler",
+          "ResultPath": "$.error"
+        }
+      ],
+      "End": true
+    },
+    "ErrorHandler": {
+      "Type": "Pass",
+      "Comment": "Gestion des erreurs - log et notification",
+      "Result": {
+        "status": "error",
+        "message": "Une erreur s'est produite dans le workflow"
+      },
+      "End": true
+    }
+  }
+}
