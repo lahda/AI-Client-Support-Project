@@ -68,7 +68,7 @@ Architecture serverless entièrement automatisée qui :
 
 ### Diagramme d'architecture
 
-![Architecture](./architecture-diagram.png)
+![Architecture](./Architecture d'Orchestration IA pour Support Client Multilingue.drawio.png)
 
 ### Architecture simplifiée
 ```
