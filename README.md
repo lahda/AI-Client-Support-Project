@@ -68,7 +68,7 @@ Architecture serverless entièrement automatisée qui :
 
 ### Diagramme d'architecture
 
-![Architecture](./architecture-diagram.png)
+![Architecture](./architecture-diagram.drawio.png)
 
 ### Architecture simplifiée
 ```
